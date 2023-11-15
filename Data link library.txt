@@ -1,0 +1,49 @@
+import java.util.*;
+import java.io.*;
+
+public class Cal_JNI{
+	static{
+		System.loadLibrary("calculator");
+	}
+	public native int add(int a,int b);
+	public static void main(String []args){
+		new Cal_JNI().add(10,20);
+	}
+}
+
+/*
+gedit Cal_JNI.java
+
+copy code in text editor
+
+javac Cal_JNI.java
+
+1. javah -jni Cal_JNI
+2. javac -h Cal_JNI.java
+
+then find Cal_JNI.h
+then copy two lines
+
+gedit cal.c
+
+type this in cal.c
+
+#include<studio.h>
+#include<jni.h>
+#include "Cal_JNI.h"
+
+paste that line(remove ;){
+	return (a+b);
+}
+
+go in terminal 
+
+locate jni.h
+locate jni_md.h
+
+1. gcc -I /jni.h path/ -I /jmi_md.h path/ -o libcalculator.so -shared -fpic cal.c
+2. gcc -I /jni.h path/ -I /jmi_md.h path/ -o libcalculator.so -shared cal.c
+
+1. java -Djava.library.path=. Cal_JNI
+2. java -Djava.library.path=. cal.c
+*/

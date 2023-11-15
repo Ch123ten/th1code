@@ -1,0 +1,76 @@
+import java.util.concurrent.Semaphore;
+
+class ReaderWriterProblem {
+    private static final Semaphore mutex = new Semaphore(1);
+    private static final Semaphore wrt = new Semaphore(1);
+    private static int readCount = 0;
+
+    static class Reader implements Runnable {
+        @Override
+        public void run() {
+            try {
+                mutex.acquire();
+                readCount++;
+                if (readCount == 1) {
+                    wrt.acquire();
+                }
+                mutex.release();
+
+                // Reading is performed
+                System.out.println("Reader is reading");
+
+                mutex.acquire();
+                readCount--;
+                if (readCount == 0) {
+                    wrt.release();
+                }
+                mutex.release();
+
+                // Exit statement for reader
+                System.out.println("Reader has finished reading");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    static class Writer implements Runnable {
+        @Override
+        public void run() {
+            try {
+                wrt.acquire();
+
+                // Writing is performed
+                System.out.println("Writer is writing");
+
+                wrt.release();
+
+                // Exit statement for writer
+                System.out.println("Writer has finished writing");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Thread[] readers = new Thread[5];
+        Thread[] writers = new Thread[5];
+
+        for (int i = 0; i < 5; i++) {
+            readers[i] = new Thread(new Reader());
+            writers[i] = new Thread(new Writer());
+            readers[i].start();
+            writers[i].start();
+        }
+
+        try {
+            for (int i = 0; i < 5; i++) {
+                readers[i].join();
+                writers[i].join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
